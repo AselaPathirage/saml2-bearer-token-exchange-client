@@ -218,7 +218,7 @@ app.post('/get-token', async (req, res) => {
     res.status(502).send(html(`
       <h3>Token exchange failed</h3>
       <pre>${esc(JSON.stringify(detail, null, 2))}</pre>
-      <h4>Troubleshooting</h4>
+      <h4>Troubleshooting in a APIM and IS seperate setup (not Resident KM)</h4>
       <ul>
         <li>IS SP config Audience include: <code>${esc(process.env.SP_CALLBACK_URL)}</code> and <code>${esc(process.env.APIM_TOKEN_ENDPOINT)}</code></li>
         <li>IS public cert in APIM IdP config must match <code>${esc(process.env.IDP_CERT_PATH)}</code></li>
