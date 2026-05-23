@@ -7,7 +7,13 @@ const https        = require('https');
 const express      = require('express');
 const session      = require('express-session');
 const passport     = require('passport');
-const SamlStrategy = require('passport-saml').Strategy;
+// @node-saml/passport-saml (v4+) is the actively maintained successor to passport-saml.
+// The underlying node-saml library iterates over all SubjectConfirmation elements and
+// accepts the assertion if any one of them is a valid bearer confirmation.  This correctly
+// handles WSO2 IS 6.1.0, which emits two bearer SubjectConfirmations when "Enable Recipient
+// Validation" is on: one with the ACS URL and one with the configured Recipient (token
+// endpoint).  passport-saml ≤2.x / 3.x threw on length > 1 unconditionally.
+const { Strategy: SamlStrategy } = require('@node-saml/passport-saml');
 const axios        = require('axios');
 
 // ─── Validate required env vars ───────────────────────────────────────────────
@@ -55,13 +61,13 @@ const samlStrategy = new SamlStrategy(
     // IdP settings
     entryPoint:           process.env.IDP_SSO_URL,
     logoutUrl:            process.env.IDP_LOGOUT_URL,
-    cert:                 fs.readFileSync(process.env.IDP_CERT_PATH, 'utf8'),
+    idpCert:              fs.readFileSync(process.env.IDP_CERT_PATH, 'utf8'),
 
     // SP signing key — signs the AuthnRequest sent to IS.
     // Required when IS SP config has "Enable Signature Validation" checked.
     ...(spPrivateKey && {
       privateKey:         spPrivateKey,
-      signingCert:        spCert,
+      publicCert:         spCert,
     }),
 
     // Assertion validation
